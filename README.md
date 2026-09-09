@@ -59,7 +59,12 @@ David Zachary is the human concept originator. OpenAI ChatGPT materially assiste
 ## Files
 
 - adaptive_representation_v5c_fair_baseline.md
-- adaptive_representation_v5c.py
+
+## What to Read first
+- README.md (This)
+- adaptive_representation_v5c_fair_baseline.md (technical hypothesis and baseline test)
+- adaptive_representation_v5c.py - executable model
+- baseline_test/ earlier experiments / development history
 
 README.md
 Displaying README.md.
