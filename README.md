@@ -7,7 +7,7 @@ Skip to content
 Using thedrz.com Mail with screen readers
 2 of 116
 Cinquabit readme
-David Zachary <david@thedrz.com>
+David Zachary 
 	
 Attachments4:51 PM (6 minutes ago)
 	
