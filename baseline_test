@@ -1,0 +1,195 @@
+V5C FAIR-BASELINE TEST
+A fixed conventional     30954.8
+B adaptive conventional  29834.3   vs A 3.62%
+D without R gear         29834.3   delta vs B 0.0000%
+D with R gear            28308.1   vs A 8.55%   vs B 5.12%
+Shifts B/D: 3 3
+D mode decisions
+dense-general          best=G selected=G shift=False G=1.022 S=1.060 R=1.115
+structured-sparse      best=R selected=R shift=True G=0.359 S=0.319 R=0.292
+geometric-heavy        best=R selected=R shift=False G=0.366 S=0.358 R=0.278
+dense-general-2        best=G selected=G shift=True G=1.014 S=1.052 R=1.105
+hamiltonian-like       best=R selected=R shift=True G=0.278 S=0.226 R=0.193
+rf-mixed               best=G selected=R shift=False G=0.692 S=0.703 R=0.697
+geometric-heavy-2      best=R selected=R shift=False G=0.361 S=0.355 R=0.271
+state-space-like       best=R selected=R shift=False G=0.515 S=0.498 R=0.482
+Maximum uniform additional R-mode cost before D ceases beating B: 0.0668
+Created:
+/mnt/data/adaptive_representation_v5c_fair_baseline.md
+/mnt/data/adaptive_representation_v5c.py
+from pathlib import Path
+
+phases=[
+("dense-general",.00,.03,.97,7000),("structured-sparse",.62,.18,.20,9000),
+("geometric-heavy",.08,.78,.14,6000),("dense-general-2",.00,.04,.96,5500),
+("hamiltonian-like",.73,.16,.11,8500),("rf-mixed",.10,.34,.56,6500),
+("geometric-heavy-2",.05,.82,.13,5000),("state-space-like",.39,.24,.37,7500)]
+
+A={"zero":.17,"geom":.27,"general":1.05}
+B={"G":{"zero":.165,"geom":.265,"general":1.045},
+   "S":{"zero":.090,"geom":.255,"general":1.085}}
+
+# D shares EXACTLY the same G and S as B. Only R is new.
+D={"G":dict(B["G"]),"S":dict(B["S"]),
+   "R":{"zero":.060,"geom":.145,"general":1.145}}
+
+shiftB={("G","S"):20,("S","G"):20}
+shiftD={("G","S"):20,("S","G"):20,("G","R"):28,("R","G"):28,("S","R"):14,("R","S"):14}
+OBSERVE=256; HYST=.025; HORIZON=1024
+
+def avg(t,z,g,a): return z*t["zero"]+g*t["geom"]+a*t["general"]
+def fixed(tab): return sum(n*avg(tab,z,g,a) for _,z,g,a,n in phases)
+
+def adaptive(T,shift):
+    m="G";tot=0.;sh=0;dec=[]
+    for name,z,g,a,n in phases:
+        ob=min(OBSERVE,n);tot+=ob*avg(T[m],z,g,a);rem=n-ob
+        rates={q:avg(t,z,g,a) for q,t in T.items()}
+        best=min(rates,key=rates.get);sw=False
+        if best!=m and rem:
+            rel=(rates[m]-rates[best])/rates[m]
+            sc=shift[(m,best)]
+            gain=(rates[m]-rates[best])*min(HORIZON,rem)
+            if rel>=HYST and gain>1.25*sc:
+                tot+=sc;m=best;sh+=1;sw=True
+        tot+=rem*avg(T[m],z,g,a)
+        dec.append((name,best,m,sw,rates))
+    return tot,sh,dec
+
+a=fixed(A)
+b,sb,_=adaptive(B,shiftB)
+d,sd,dec=adaptive(D,shiftD)
+
+# Also run D with R disabled; it MUST equal B.
+d_no_r,_,_=adaptive({"G":D["G"],"S":D["S"]},shiftB)
+
+print("V5C FAIR-BASELINE TEST")
+print(f"A fixed conventional     {a:.1f}")
+print(f"B adaptive conventional  {b:.1f}   vs A {100*(a-b)/a:.2f}%")
+print(f"D without R gear         {d_no_r:.1f}   delta vs B {100*(b-d_no_r)/b:.4f}%")
+print(f"D with R gear            {d:.1f}   vs A {100*(a-d)/a:.2f}%   vs B {100*(b-d)/b:.2f}%")
+print("Shifts B/D:",sb,sd)
+
+print("\nD mode decisions")
+for name,best,m,sw,r in dec:
+    print(f"{name:22} best={best} selected={m} shift={sw} G={r['G']:.3f} S={r['S']:.3f} R={r['R']:.3f}")
+
+# R-mode penalty break-even with G/S identical baseline
+def dpen(p):
+    T={"G":dict(D["G"]),"S":dict(D["S"]),"R":{k:v+p for k,v in D["R"].items()}}
+    return adaptive(T,shiftD)[0]
+
+lo,hi=0,.5
+for _ in range(60):
+    mid=(lo+hi)/2
+    if dpen(mid)<b: lo=mid
+    else: hi=mid
+print(f"\nMaximum uniform additional R-mode cost before D ceases beating B: {lo:.4f}")
+
+report=f"""# Adaptive Representation Processing — V5C Fair-Baseline Result
+
+Concept originator: David Zachary  
+Technical modeling and drafting assistance: OpenAI ChatGPT  
+Date: August 10, 2026  
+Status: exploratory open research hypothesis; not peer reviewed
+
+## Why V5C exists
+
+V5B contained a confound: the experimental adaptive machine had slightly cheaper General and Structured modes than the adaptive conventional comparator. V5C removes that advantage.
+
+In V5C, machines B and D have *identical* G and S cost tables. D receives exactly one additional capability: the Relational/Geometric (R) gear.
+
+Therefore:
+
+
+D with R disabled must equal B.
+Any modeled difference between D and B with R enabled comes from mode selection into R, less transition/observation costs.
+
+
+This is the appropriate comparison for isolating the proposed contribution.
+
+## Results
+
+A fixed conventional: {a:.1f}
+
+B adaptive conventional G/S: {b:.1f}  
+Improvement B vs A: {100*(a-b)/a:.2f}%
+
+D with R disabled: {d_no_r:.1f}  
+Difference from B: {100*(b-d_no_r)/b:.4f}% (should be zero)
+
+D with R enabled: {d:.1f}  
+Improvement D vs A: {100*(a-d)/a:.2f}%  
+Improvement D vs adaptive B: {100*(b-d)/b:.2f}%
+
+B shifts {sb} times. D shifts {sd} times.
+
+## Interpretation
+
+Under these normalized assumptions, the relational gear adds a measurable model advantage beyond an otherwise identical adaptive conventional G/S machine.
+
+This remains a hypothesis, not a hardware performance result.
+
+The result disappears if the real R datapath's extra implementation burden exceeds the measured break-even budget. In this model the R path can tolerate approximately {lo:.4f} normalized additional cost per R-mode operation before its advantage over B vanishes.
+
+## Controller
+
+The controller:
+
+observes 256 operations before reacting to a new phase;
+requires a 2.5% estimated efficiency advantage;
+evaluates savings over a conservative 1024-operation horizon;
+shifts only when projected savings exceed 1.25x the transition cost.
+
+
+It has no foreknowledge of the next phase.
+
+## Workload sequence
+
+The mixed trace contains:
+
+dense arbitrary complex work,
+sparse structured work,
+geometric-heavy work,
+Hamiltonian-like sparse complex work,
+RF-like mixed work,
+state-space-like recurrence.
+
+
+The intent is specifically to punish any fixed execution regime.
+
+## What is still missing
+
+The decisive missing evidence is RTL/FPGA measurement.
+
+A field researcher should implement:
+
+baseline adaptive G/S tile;
+identical tile plus R datapath and mode selector;
+same FPGA, clock constraints, precision, memory interface, and benchmark traces.
+
+
+Report LUT/FF/DSP/BRAM use, Fmax, power, throughput, transition cost, and fault behavior.
+
+Until then, V5C establishes only that the *architectural hypothesis is internally testable and can outperform an identical adaptive baseline under a transparent cost model*.
+
+## Scientific value if it fails
+
+If FPGA synthesis shows the R path's area, routing, or power burden exceeds the break-even budget, that negative result directly answers the central question and should be published with the model.
+"""
+Path("/mnt/data/adaptive_representation_v5c_fair_baseline.md").write_text(report)
+
+code=f'''"""V5C fair-baseline adaptive representation model.
+B and D share identical G/S costs. D differs only by availability of R mode.
+Normalized costs are hypotheses, not hardware measurements.
+Headline modeled D-vs-B advantage: {100*(b-d)/b:.3f}%.
+"""
+# See adaptive_representation_v5c_fair_baseline.md for full assumptions and results.
+'''
+Path("/mnt/data/adaptive_representation_v5c.py").write_text(code)
+
+print("\nCreated:")
+print("/mnt/data/adaptive_representation_v5c_fair_baseline.md")
+print("/mnt/data/adaptive_representation_v5c.py")
+// https://chatgpt.com/s/t_6a7a50ed88e0819190ff9418d0f78f7d
+// https://chatgpt.com/share/e/6a7a5117-55b0-8001-bf60-91f40421409e
