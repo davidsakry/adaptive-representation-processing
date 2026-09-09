@@ -1,14 +1,12 @@
 I have been thinking for a long time about why biology chose a four bit system (ACTG) for its coding and was exploring it with the thought of getting some middle ground between traditional and Q computing by pairing bits together. I really didn't expect much to come out of it other than a fun conversation. but as GPT and I were talking, I stumbled across this framework that fuses the bits as a single package to get the advantage of additional states with combined bits. this may help biological research or CS. I don't know. we pushed the understanding to the limits of my CS dropout brain and I had GPT take the next step. here is it's report. good bad or otherwise. 
 
-# cinquabit-test-paramaters
 adaptive processors change precision, resource allocation, sparsity handling, frequency, and excecution resources. we ask whether runtime observation can also select the mathematical representation and excecution regime itself, switching among conventional, structured/sparse, and relational/geometric on efficiency. Apache-2.0/CC BY 4.0
 
 None selected 
 
 Skip to content
-Using thedrz.com Mail with screen readers
 2 of 116
-Cinquabit readme
+readme
 David Zachary 
 	
 Attachments4:51 PM (6 minutes ago)
