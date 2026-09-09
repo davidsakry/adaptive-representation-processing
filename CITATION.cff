@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use, test, extend, or discuss this work, please cite it as below."
+
+title: "Adaptive Representation Processing: An Open Architecture Hypothesis for Runtime Selection of Mathematical Execution Regimes"
+
+type: software
+
+authors:
+  - family-names: "Zachary"
+    given-names: "David"
+
+repository-code: "https://github.com/Davidsakry/adaptive-representation-processing"
+
+abstract: >
+  Adaptive Representation Processing is an exploratory computer-architecture
+  hypothesis investigating whether a processing system can dynamically select
+  among general, structured/sparse, and relational/geometric execution regimes
+  according to observed workload behavior. The project includes transparent
+  executable models, fair-baseline comparisons, break-even analysis, and
+  explicit falsification criteria. Current results are normalized model
+  outputs and are not hardware performance measurements.
+
+keywords:
+  - computer architecture
+  - adaptive computing
+  - reconfigurable computing
+  - accelerator architecture
+  - sparse computing
+  - complex arithmetic
+  - runtime adaptation
+  - performance monitoring
+  - relational processing
+  - geometric processing
+
+license: Apache-2.0
